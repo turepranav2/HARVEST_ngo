@@ -21,11 +21,15 @@ import Gallery from './views/gallery'
 import Blog from './views/blog'
 import FAQ from './views/faq'
 import NotFound from './views/not-found'
+import AdminApp from './admin/AdminApp'
 
 const App = () => {
   return (
     <Router>
       <Switch>
+        <Route path="/admin">
+          <AdminApp />
+        </Route>
         <Route component={Home} exact path="/" />
         <Route component={About} exact path="/about" />
         <Route component={Services} exact path="/services" />

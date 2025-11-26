@@ -1,63 +1,54 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet'
-import { Link } from 'react-router-dom'
 
-import Navbar from '../components/navbar'
-import Footer from '../components/footer'
+import DynamicNavbar from '../components/DynamicNavbar'
+import DynamicFooter from '../components/DynamicFooter'
+import { fetchEvents } from '../services/api'
+import { usePageContent } from '../hooks/usePageContent'
 import './events.css'
 
 const Events = () => {
-  const events = [
-    {
-      title: 'Annual Charity Drive',
-      date: 'June 15, 2024',
-      description: 'Join us for our annual charity drive to support local communities',
-      location: 'Main Campus'
-    },
-    {
-      title: 'Educational Workshop',
-      date: 'July 1, 2024',
-      description: 'Free workshop on digital literacy for students',
-      location: 'Learning Center'
-    },
-    {
-      title: 'Health Camp',
-      date: 'July 20, 2024',
-      description: 'Free health checkup camp for the community',
-      location: 'Community Hall'
-    },
-    {
-      title: 'Cultural Festival',
-      date: 'August 5, 2024',
-      description: 'Celebrating our rich cultural heritage through performances',
-      location: 'Open Air Theater'
-    }
-  ]
+  const { getText } = usePageContent('events')
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchEvents({ activeOnly: true })
+      .then(setEvents)
+      .catch(() => setEvents([]))
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <div className="events-container">
       <Helmet>
-        <title>Events - Raje Shivchatrapati Institute</title>
-        <meta property="og:title" content="Events - Raje Shivchatrapati Institute" />
+        <title>{getText('seo', 'title', 'Events - HĀRVÉST')}</title>
+        <meta property="og:title" content={getText('seo', 'title', 'Events - HĀRVÉST')} />
       </Helmet>
-      <Navbar />
+      <DynamicNavbar />
       <div className="events-main">
-        <h1 className="events-title">Upcoming Events</h1>
-        <div className="events-grid">
-          {events.map((event, index) => (
-            <div key={index} className="event-card">
-              <h3>{event.title}</h3>
-              <div className="event-details">
-                <p className="event-date">📅 {event.date}</p>
-                <p className="event-location">📍 {event.location}</p>
+        <h1 className="events-title">{getText('hero', 'heading', 'Upcoming Events')}</h1>
+        {loading ? (
+          <p className="events-loading">Loading events...</p>
+        ) : events.length === 0 ? (
+          <p className="events-empty">{getText('hero', 'empty_state', 'No events scheduled right now.')}</p>
+        ) : (
+          <div className="events-grid">
+            {events.map((event) => (
+              <div key={event.id} className="event-card">
+                {event.image && <img src={event.image} alt={event.title} className="event-image" />}
+                <h3>{event.title}</h3>
+                <div className="event-details">
+                  <p className="event-date">📅 {new Date(event.date).toLocaleDateString()}</p>
+                  <p className="event-location">📍 {event.location}</p>
+                </div>
+                <p className="event-description">{event.description}</p>
               </div>
-              <p className="event-description">{event.description}</p>
-              <Link to="/register" className="event-register">Register Now</Link>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
-      <Footer />
+      <DynamicFooter />
     </div>
   )
 }

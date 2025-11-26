@@ -2,7 +2,9 @@ import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { Link } from 'react-router-dom'
 
-import Navbar from '../components/navbar'
+import DynamicNavbar from '../components/DynamicNavbar'
+import DynamicFooter from '../components/DynamicFooter'
+import { usePageContent } from '../hooks/usePageContent'
 import './login.css'
 
 const Login = () => {
@@ -10,6 +12,7 @@ const Login = () => {
     email: '',
     password: ''
   })
+  const { getText } = usePageContent('login')
 
   const handleChange = (e) => {
     setLoginData({
@@ -28,27 +31,27 @@ const Login = () => {
   return (
     <div className="login-container">
       <Helmet>
-        <title>Login - Raje Shivchatrapati Institute</title>
-        <meta property="og:title" content="Login - Raje Shivchatrapati Institute" />
+        <title>{getText('seo', 'title', 'Login - HĀRVÉST')}</title>
+        <meta property="og:title" content={getText('seo', 'title', 'Login - HĀRVÉST')} />
       </Helmet>
-      <Navbar />
+      <DynamicNavbar />
       <div className="login-split-screen">
         <div className="login-left">
           <div className="login-overlay"></div>
           <div className="login-content-left">
-            <h1>Welcome Back</h1>
-            <p>Join us in making a difference in our community</p>
+            <h1>{getText('hero', 'heading', 'Welcome Back')}</h1>
+            <p>{getText('hero', 'subheading', 'Join us in making a difference in our community')}</p>
           </div>
         </div>
         <div className="login-right">
           <div className="login-form-container">
             <div className="login-header">
-              <h2>Sign In</h2>
-              <p>Please sign in to continue</p>
+              <h2>{getText('form', 'heading', 'Sign In')}</h2>
+              <p>{getText('form', 'subheading', 'Please sign in to continue')}</p>
             </div>
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">{getText('form', 'email_label', 'Email')}</label>
                 <div className="input-group">
                   <i className="fas fa-envelope"></i>
                   <input
@@ -58,12 +61,12 @@ const Login = () => {
                     value={loginData.email}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your email"
+                    placeholder={getText('form', 'email_placeholder', 'Enter your email')}
                   />
                 </div>
               </div>
               <div className="form-group">
-                <label htmlFor="password">Password</label>
+                <label htmlFor="password">{getText('form', 'password_label', 'Password')}</label>
                 <div className="input-group">
                   <i className="fas fa-lock"></i>
                   <input
@@ -73,19 +76,23 @@ const Login = () => {
                     value={loginData.password}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your password"
+                    placeholder={getText('form', 'password_placeholder', 'Enter your password')}
                   />
                 </div>
               </div>
               <div className="form-options">
                 <label className="remember-me">
-                  <input type="checkbox" /> Remember me
+                  <input type="checkbox" /> {getText('form', 'remember_me', 'Remember me')}
                 </label>
-                <Link to="/forgot-password" className="forgot-password">Forgot Password?</Link>
+                <Link to="/forgot-password" className="forgot-password">
+                  {getText('form', 'forgot_password', 'Forgot Password?')}
+                </Link>
               </div>
-              <button type="submit" className="login-button">Sign In</button>
+              <button type="submit" className="login-button">
+                {getText('form', 'submit', 'Sign In')}
+              </button>
               <div className="social-login">
-                <p>Or sign in with</p>
+                <p>{getText('social', 'heading', 'Or sign in with')}</p>
                 <div className="social-buttons">
                   <button type="button" className="social-button google">
                     <i className="fab fa-google"></i>
@@ -97,11 +104,15 @@ const Login = () => {
               </div>
             </form>
             <div className="login-footer">
-              <p>Don't have an account? <Link to="/register">Create Account</Link></p>
+              <p>
+                {getText('form', 'switch_prompt', "Don't have an account?")}{' '}
+                <Link to="/register">{getText('form', 'switch_cta', 'Create Account')}</Link>
+              </p>
             </div>
           </div>
         </div>
       </div>
+      <DynamicFooter />
     </div>
   )
 }

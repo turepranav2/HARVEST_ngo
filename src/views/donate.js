@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 import { Helmet } from 'react-helmet'
 
-import Navbar from '../components/navbar'
+import DynamicNavbar from '../components/DynamicNavbar'
+import DynamicFooter from '../components/DynamicFooter'
+import { usePageContent } from '../hooks/usePageContent'
+import { createDonationOrder } from '../services/api'
 import './donate.css'
 
 const Donate = () => {
+  const { getText } = usePageContent('donate')
   const [donationData, setDonationData] = useState({
     amount: '',
     customAmount: '',
@@ -34,31 +38,63 @@ const Donate = () => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const [status, setStatus] = useState({ type: '', message: '' })
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Here you would typically handle the donation processing
-    console.log('Donation attempt:', donationData)
-    alert('Thank you for your generous donation! We will process your contribution soon.')
+    const selectedAmount = Number(donationData.customAmount || donationData.amount)
+    if (!selectedAmount || selectedAmount < 100) {
+      setStatus({ type: 'error', message: 'Minimum donation amount is ₹100.' })
+      return
+    }
+    setLoading(true)
+    setStatus({ type: '', message: '' })
+    try {
+      const response = await createDonationOrder({
+        amount: selectedAmount,
+        customer_name: donationData.name,
+        customer_email: donationData.email,
+        customer_phone: donationData.phone,
+        currency: 'INR',
+      })
+
+      if (response?.payment_link) {
+        window.location.href = response.payment_link
+      } else {
+        setStatus({
+          type: 'success',
+          message: 'Donation initiated. Please check your email for payment instructions.',
+        })
+      }
+    } catch (error) {
+      setStatus({
+        type: 'error',
+        message: error.response?.data?.detail || 'Unable to create payment link right now.',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <div className="donate-container">
       <Helmet>
-        <title>Donate - Raje Shivchatrapati Institute</title>
-        <meta property="og:title" content="Donate - Raje Shivchatrapati Institute" />
+        <title>{getText('seo', 'title', 'Donate - HĀRVÉST')}</title>
+        <meta property="og:title" content={getText('seo', 'title', 'Donate - HĀRVÉST')} />
       </Helmet>
-      <Navbar />
+      <DynamicNavbar />
       <div className="donate-hero">
         <div className="donate-hero-content">
-          <h1>Make a Difference Today</h1>
-          <p>Your contribution helps us create positive change in our community</p>
+          <h1>{getText('hero', 'heading', 'Make a Difference Today')}</h1>
+          <p>{getText('hero', 'subheading', 'Your contribution helps us create positive change in our community')}</p>
         </div>
       </div>
       <div className="donate-main">
         <div className="donate-grid">
           <div className="donate-info-card">
             <div className="info-section">
-              <h2>Your Impact</h2>
+              <h2>{getText('impact', 'heading', 'Your Impact')}</h2>
               <div className="impact-list">
                 {predefinedAmounts.map((amount) => (
                   <div key={amount} className="impact-item" onClick={() => handleAmountSelect(amount)}>
@@ -74,23 +110,23 @@ const Donate = () => {
               </div>
             </div>
             <div className="info-section">
-              <h2>Why Donate?</h2>
+              <h2>{getText('benefits', 'heading', 'Why Donate?')}</h2>
               <ul className="benefits-list">
                 <li>
                   <i className="fas fa-check-circle"></i>
-                  <span>Tax benefits under Section 80G</span>
+                  <span>{getText('benefits', 'item1', 'Tax benefits under Section 80G')}</span>
                 </li>
                 <li>
                   <i className="fas fa-check-circle"></i>
-                  <span>100% of donations go to programs</span>
+                  <span>{getText('benefits', 'item2', '100% of donations go to programs')}</span>
                 </li>
                 <li>
                   <i className="fas fa-check-circle"></i>
-                  <span>Regular updates on impact</span>
+                  <span>{getText('benefits', 'item3', 'Regular updates on impact')}</span>
                 </li>
                 <li>
                   <i className="fas fa-check-circle"></i>
-                  <span>Transparent fund utilization</span>
+                  <span>{getText('benefits', 'item4', 'Transparent fund utilization')}</span>
                 </li>
               </ul>
             </div>
@@ -98,9 +134,9 @@ const Donate = () => {
 
           <div className="donate-form-container">
             <form className="donate-form" onSubmit={handleSubmit}>
-              <h2>Make Your Donation</h2>
+              <h2>{getText('form', 'heading', 'Make Your Donation')}</h2>
               <div className="amount-section">
-                <label>Select Amount</label>
+                <label>{getText('form', 'amount_label', 'Select Amount')}</label>
                 <div className="amount-options">
                   {predefinedAmounts.map((amount) => (
                     <button
@@ -206,18 +242,24 @@ const Donate = () => {
                 />
               </div>
 
-              <button type="submit" className="donate-button">
-                Donate ₹{donationData.customAmount || donationData.amount || '0'}
+              {status.message && (
+                <div className={`donate-status ${status.type}`}>{status.message}</div>
+              )}
+              <button type="submit" className="donate-button" disabled={loading}>
+                {loading
+                  ? 'Connecting to Cashfree...'
+                  : `Donate ₹${donationData.customAmount || donationData.amount || '0'}`}
               </button>
 
               <div className="secure-payment">
                 <i className="fas fa-lock"></i>
-                <span>Secure Payment | 256-bit SSL Encrypted</span>
+                <span>{getText('form', 'secure_text', 'Secure Payment | 256-bit SSL Encrypted')}</span>
               </div>
             </form>
           </div>
         </div>
       </div>
+      <DynamicFooter />
     </div>
   )
 }

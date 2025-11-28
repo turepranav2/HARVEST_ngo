@@ -1,9 +1,149 @@
+# HĀRVÉST — Holistic Advancement for Rural Vitality, Empowerment, and Sustainable Transformation
+
+A web platform with a public React frontend, an admin React frontend, and a Node.js (Express + Prisma) backend for managing dynamic content, events, blogs, galleries, donations, and more.
+
+**This README** contains quick setup and run instructions for local development, environment variable examples, and pointers to the main project areas (`backend`, `admin-frontend`, and public `src`). Only the README was edited.
+**Project layout (top-level)**
+
+- `backend/` — Node.js/Express API (Prisma ORM, Cloudinary integration, donation/webhook handlers)
+- `admin-frontend/` — React admin panel used by site administrators
+- `src/` — Public React frontend (site pages and components)
+- `public/` — Static assets for public frontend
+- `build/` — Production build output for the public frontend
+
+**Ports used by convention**
+
+- Backend API: `http://localhost:5000` (API prefix: `/api`)
+- Public frontend: `http://localhost:3000`
+- Admin frontend: `http://localhost:3001` (if started on a different port)
+
+**Prerequisites**
+
+- Node.js 18+ (project `engines` requires >=18)
+- npm (bundled with Node) or yarn
+- PostgreSQL (or a hosted Neon/NeonDB/Postgres compatible DB) for Prisma
+- Cloudinary account (for image uploads) — optional for local dev if you mock uploads
+
+**Quick start (Windows PowerShell)**
+
+1) Install root/dev dependencies (top-level project contains `craco` driven scripts for the public frontend):
+
+```powershell
+# from repository root
+npm install
+```
+
+2) Backend setup — install and run:
+
+```powershell
+# move into backend
+Set-Location -Path backend
+npm install
+# create a .env file or copy example, then run migrations & seed
+# Example: copy env template (if provided) and edit values
+# Copy or create a .env in backend with required vars (see 'Environment' below)
+# Generate Prisma client and run migrations:
+npx prisma generate
+npx prisma migrate dev --name init
+# seed (if present)
+node prisma/seed.js
+# start dev server (uses env config in backend/src/config/env.js)
+npm run dev
+```
+
+By default the backend listens on `http://localhost:5000` and exposes routes under `/api` (e.g. `http://localhost:5000/api/events`).
+
+3) Public frontend (site) — install & run:
+
+```powershell
+# from repo root
+npm run start
+# or if you prefer to work directly inside `src` app, you can use `craco` which is configured in the root package.json
+```
+
+4) Admin frontend — install & run:
+
+```powershell
+Set-Location -Path admin-frontend
+npm install
+npm start
+# default admin panel will open on port 3000 or 3001 depending on availability/config
+```
+
+Notes:
+
+- The root uses `craco` with `react-scripts` so frontend commands are available in the root `package.json`.
+- If port collisions occur, set `PORT` environment variable before starting the dev server: ` $env:PORT = 3001; npm start` (PowerShell).
+
+**Environment variables — examples**
+
+Create `.env` files in the appropriate folders (`backend/.env`, `admin-frontend/.env` or root as needed). Example keys used by the backend (adjust names to match `backend/src/config/env.js`):
+
+```
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+PORT=5000
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+EMAIL_USER=your_email_user
+EMAIL_PASS=your_email_password
+EMAIL_FROM="Example <no-reply@example.org>"
+```
+
+Admin and frontend apps may use `REACT_APP_API_BASE_URL` or similar env vars to point to the backend. Check `admin-frontend/src/utils/api.js` and `src/admin/api.js` for the exact variable names used.
+
+**Prisma**
+
+- Schema and migrations live in `backend/prisma/`.
+- To generate client: `npx prisma generate` (run inside `backend`)
+- To run migrations during development: `npx prisma migrate dev --name <name>`
+
+**Scripts (high-level)**
+
+- `npm run start` — Starts public frontend via `craco` (root package.json)
+- `npm run build` — Builds public frontend
+- `npm run test` — Runs tests (if configured)
+- `backend`: use `npm run dev` or `node src/server.js` depending on backend's package.json scripts
+- `admin-frontend`: use `npm start` inside that directory
+
+**Common troubleshooting**
+
+- If dependencies fail to install: delete `node_modules` and `package-lock.json`, then run `npm install` again.
+- If Prisma migration fails: verify `DATABASE_URL` in `backend/.env` and that the DB server is reachable.
+- If image uploads fail: confirm Cloudinary credentials in env and that `backend/src/lib/cloudinary.js` or `services/cloudinaryService.js` is properly configured.
+
+**Where to look in the codebase**
+
+- API routes: `backend/src/routes/`
+- Controllers: `backend/src/controllers/`
+- Services: `backend/src/services/`
+- Public frontend pages: `src/views/`
+- Admin frontend components: `admin-frontend/src/components/`
+
+**Next steps / Suggestions**
+
+- Run the backend locally and seed the DB to verify endpoints: inside `backend`, run migrations and `node src/server.js` or `npm run dev`.
+- Start admin frontend and public frontend, then test image uploads and donation flow (if credentials available).
+- If you want, I can also add a short `CONTRIBUTING.md`, add a `make`/`ps1` helper script for common tasks, or wire up a `Dev` script to run frontend + backend concurrently.
+
+If you'd like I can now:
+
+- **(A)** run quick checks to detect missing env vars in `backend/src/config/env.js` and list them, or
+- **(B)** create a small `scripts/` folder with PowerShell helper commands to start all services concurrently.
+
+Tell me which option you prefer, or ask for a different change.
 # HĀRVÉST - Holistic Advancement for Rural Vitality, Empowerment, and Sustainable Transformation
 
 A comprehensive web platform with public + admin React frontends powered by a modern Node.js (Express + Prisma) backend for managing the organization's dynamic content, events, blogs, galleries, donations, and more.
 
 ## Project Structure
 
+### Events
+- `GET /api/events` - List events
+- `GET /api/events/{id}` - Get event
+- `POST /api/events` - Create event (auth required)
+- `PUT /api/events/{id}` - Update event (auth required)
 ```
 MAJOR_PROJECT/
 ├── backend/                 # Node.js/Express API with Prisma ORM
@@ -368,7 +508,7 @@ For production, configure static file serving (e.g., WhiteNoise, AWS S3, or Clou
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create a feature branch.
 3. Make your changes
 4. Submit a pull request
 

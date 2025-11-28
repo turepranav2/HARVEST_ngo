@@ -14,10 +14,7 @@ const Steps = (props) => {
               Discover the Power of Our Products
             </h2>
             <p className="thq-body-large">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Suspendisse varius enim in eros elementum tristique. Duis cursus,
-              mi quis viverra ornare, eros dolor interdum nulla, ut commodo diam
-              libero vitae erat.
+               
             </p>
             <div className="steps-actions">
               <button className="thq-button-filled thq-button-animated steps-button">
